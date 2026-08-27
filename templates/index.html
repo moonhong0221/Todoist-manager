@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>할 일 관리</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>할 일 관리</h1>
+
+    <form id="task-form" class="task-form">
+      <input type="text" id="task-input" placeholder="할 일을 입력하세요" autocomplete="off" required>
+      <button type="submit">추가</button>
+    </form>
+
+    <ul id="task-list" class="task-list"></ul>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
