@@ -3,14 +3,25 @@ const API_URL = "/api/tasks";
 const form = document.getElementById("task-form");
 const input = document.getElementById("task-input");
 const list = document.getElementById("task-list");
+const filterBar = document.getElementById("filter-bar");
+
+let allTasks = [];
+let currentFilter = "all";
 
 async function fetchTasks() {
   const res = await fetch(API_URL);
-  const tasks = await res.json();
-  renderTasks(tasks);
+  allTasks = await res.json();
+  renderTasks();
 }
 
-function renderTasks(tasks) {
+function getFilteredTasks() {
+  if (currentFilter === "active") return allTasks.filter((task) => !task.is_done);
+  if (currentFilter === "done") return allTasks.filter((task) => task.is_done);
+  return allTasks;
+}
+
+function renderTasks() {
+  const tasks = getFilteredTasks();
   list.innerHTML = "";
 
   if (tasks.length === 0) {
@@ -75,6 +86,15 @@ form.addEventListener("submit", async (e) => {
   if (!title) return;
   input.value = "";
   await addTask(title);
+});
+
+filterBar.addEventListener("click", (e) => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+
+  currentFilter = btn.dataset.filter;
+  filterBar.querySelectorAll(".filter-btn").forEach((b) => b.classList.toggle("active", b === btn));
+  renderTasks();
 });
 
 fetchTasks();
