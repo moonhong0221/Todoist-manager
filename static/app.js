@@ -1,27 +1,48 @@
 const API_URL = "/api/tasks";
+const PER_PAGE = 5;
 
 const form = document.getElementById("task-form");
 const input = document.getElementById("task-input");
 const list = document.getElementById("task-list");
 const filterBar = document.getElementById("filter-bar");
+const pagination = document.getElementById("pagination");
+const prevBtn = document.getElementById("prev-page");
+const nextBtn = document.getElementById("next-page");
+const pageInfo = document.getElementById("page-info");
 
-let allTasks = [];
 let currentFilter = "all";
+let currentPage = 1;
+let totalPages = 1;
 
 async function fetchTasks() {
-  const res = await fetch(API_URL);
-  allTasks = await res.json();
-  renderTasks();
+  const params = new URLSearchParams({
+    page: currentPage,
+    per_page: PER_PAGE,
+    status: currentFilter,
+  });
+  const res = await fetch(`${API_URL}?${params}`);
+  const data = await res.json();
+
+  totalPages = data.total_pages || 1;
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+    if (currentPage >= 1) {
+      await fetchTasks();
+      return;
+    }
+  }
+
+  renderTasks(data.tasks);
+  renderPagination();
 }
 
-function getFilteredTasks() {
-  if (currentFilter === "active") return allTasks.filter((task) => !task.is_done);
-  if (currentFilter === "done") return allTasks.filter((task) => task.is_done);
-  return allTasks;
+function renderPagination() {
+  pageInfo.textContent = `${currentPage} / ${totalPages}`;
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = currentPage >= totalPages;
 }
 
-function renderTasks() {
-  const tasks = getFilteredTasks();
+function renderTasks(tasks) {
   list.innerHTML = "";
 
   if (tasks.length === 0) {
@@ -63,6 +84,7 @@ async function addTask(title) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title }),
   });
+  currentPage = 1;
   await fetchTasks();
 }
 
@@ -93,8 +115,21 @@ filterBar.addEventListener("click", (e) => {
   if (!btn) return;
 
   currentFilter = btn.dataset.filter;
+  currentPage = 1;
   filterBar.querySelectorAll(".filter-btn").forEach((b) => b.classList.toggle("active", b === btn));
-  renderTasks();
+  fetchTasks();
+});
+
+prevBtn.addEventListener("click", () => {
+  if (currentPage <= 1) return;
+  currentPage -= 1;
+  fetchTasks();
+});
+
+nextBtn.addEventListener("click", () => {
+  if (currentPage >= totalPages) return;
+  currentPage += 1;
+  fetchTasks();
 });
 
 fetchTasks();

@@ -32,8 +32,25 @@ def index():
 
 @app.route("/api/tasks", methods=["GET"])
 def get_tasks():
-    tasks = Task.query.order_by(Task.created_at.desc()).all()
-    return jsonify([task.to_dict() for task in tasks])
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 5, type=int)
+    status = request.args.get("status", "all")
+
+    query = Task.query.order_by(Task.created_at.desc())
+    if status == "active":
+        query = query.filter_by(is_done=False)
+    elif status == "done":
+        query = query.filter_by(is_done=True)
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify({
+        "tasks": [task.to_dict() for task in pagination.items],
+        "page": pagination.page,
+        "per_page": per_page,
+        "total": pagination.total,
+        "total_pages": pagination.pages,
+    })
 
 
 @app.route("/api/tasks", methods=["POST"])

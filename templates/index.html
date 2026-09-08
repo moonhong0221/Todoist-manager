@@ -22,6 +22,12 @@
     </div>
 
     <ul id="task-list" class="task-list"></ul>
+
+    <div id="pagination" class="pagination">
+      <button type="button" id="prev-page" class="page-btn">이전</button>
+      <span id="page-info" class="page-info">1 / 1</span>
+      <button type="button" id="next-page" class="page-btn">다음</button>
+    </div>
   </div>
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
