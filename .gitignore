@@ -5,3 +5,4 @@ instance/
 *.db
 *.log
 .env
+client_secret_*.json
